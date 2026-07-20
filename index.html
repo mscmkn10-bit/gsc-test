@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Expense Calculator & PDF Generator</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-light: #eff6ff;
+            --accent-color: #0d9488;
+            --text-dark: #1f2937;
+            --text-light: #4b5563;
+            --border-color: #e5e7eb;
+            --bg-page: #f3f4f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            padding: 10px;
+        }
+
+        /* News Ticker Styling - For screen viewing only */
+        .news-ticker {
+            width: 100%;
+            max-width: 600px;
+            background-color: #ef4444;
+            color: white;
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 8px 0;
+            margin: 0 auto 15px auto;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ticker-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+
+        .container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 18px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .main-layout {
+            display: block;
+            width: 100%;
+        }
+
+        .form-section {
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 8px;
+        }
+
+        .checkbox-group {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px dashed var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .checkbox-label:last-child {
+            margin-bottom: 0;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--text-dark);
+            -webkit-appearance: none;
+        }
+
+        .btn-container {
+            margin-top: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+        }
+
+        .btn:active {
+            background-color: #1d4ed8;
+        }
+
+        .preview-section {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 12px;
+            background-color: #ffffff;
+            overflow-x: auto;
+        }
+
+        .invoice-box {
+            color: #222;
+            line-height: 1.5;
+            font-size: 13px;
+            background-color: #ffffff;
+            min-width: 280px;
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .invoice-header h2 {
+            font-size: 16px;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background-color: var(--primary-light);
+        }
+        
+        .meta-table td {
+            padding: 8px 12px;
+            border: 1px solid #dbeafe;
+            font-size: 13px;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .invoice-table th, 
+        .invoice-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+
+        .invoice-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .invoice-table td.amount, 
+        .invoice-table th.amount {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .table-section-head {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 14px;
+            background-color: var(--primary-light);
+            border-top: 2px solid var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .total-row td {
+            color: var(--primary-color);
+        }
+
+        .notes-section {
+            margin-top: 15px;
+            background-color: #fafafa;
+            border-left: 3px solid #f59e0b;
+            padding: 10px;
+        }
+
+        .notes-title {
+            font-weight: 600;
+            font-size: 12px;
+            color: #b45309;
+            margin-bottom: 5px;
+        }
+
+        .notes-section ul {
+            padding-left: 15px;
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        .notes-section li {
+            margin-bottom: 4px;
+        }
+
+        .invoice-footer {
+            margin-top: 25px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--accent-color);
+            font-size: 13px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+        }
+        
+        .hidden-row {
+            display: none !important;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<!-- Running News Ticker (Outside the invoice area, safe from PDF render) -->
+<div class="news-ticker">
+    <div class="ticker-text">🔥 Developed & Managed by: Govind Singh Makrana &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🔥 प्रॉपर्टी और लोन वैल्यूएशन कैलकुलेटर &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+</div>
+
+<div class="container">
+    <h1>अनुमानित व्यय विवरण गणक</h1>
+    
+    <div class="main-layout">
+        <!-- Input Form Section -->
+        <div class="form-section">
+            <div class="section-title">मूल विवरण (Basic Details)</div>
+            <div class="form-group">
+                <label for="inputClientName">क्लाइंट का नाम (Client Name)</label>
+                <input type="text" id="inputClientName" value="Punam Prajapat" oninput="updatePreview()">
+            </div>
+
+            <div class="section-title">दस्तावेज़ प्रकार चुनें (Select Document Type)</div>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="checkSaleDeed" checked onchange="toggleSections()"> Sale Deed (बिक्री विलेख)
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="checkModt" checked onchange="toggleSections()"> MODT (एम.ओ.डी.टी / लोन)
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="checkSociety" checked onchange="toggleSections()"> Society Duty (सोसाइटी शुल्क शामिल करें)
+                </label>
+            </div>
+
+            <!-- Sale Deed Inputs Group -->
+            <div id="formGroupSaleDeed">
+                <div class="section-title" style="color: #1d4ed8;">बिक्री विलेख विवरण (Sale Deed Details)</div>
+                <div class="form-group">
+                    <label for="inputSaleDeedValue">बिक्री विलेख मूल्य (Sale Deed Value)</label>
+                    <input type="number" id="inputSaleDeedValue" value="625000" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label for="inputSaleDeedCharge">Sale Deed Charge (बिक्री विलेख शुल्क)</label>
+                    <input type="number" id="inputSaleDeedCharge" value="48475" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label for="inputSaleDeedFees">Sale Deed Fees (पंजीयन शुल्क)</label>
+                    <input type="number" id="inputSaleDeedFees" value="3000" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <!-- Society Duty Input Group -->
+            <div id="formGroupSociety">
+                <div class="section-title" style="color: #b45309;">सोसाइटी शुल्क विवरण</div>
+                <div class="form-group">
+                    <label for="inputSocietyDuty">Society Duty (सोसाइटी शुल्क)</label>
+                    <input type="number" id="inputSocietyDuty" value="2300" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <!-- MODT Inputs Group -->
+            <div id="formGroupModt">
+                <div class="section-title" style="color: #0d9488;">एम.ओ.डी.टी विवरण (MODT Details)</div>
+                <div class="form-group">
+                    <label for="inputModtValue">ऋण/लोन मूल्य (MODT Value)</label>
+                    <input type="number" id="inputModtValue" value="1000930" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label for="inputModtCharge">MODT Charge (एम.ओ.डी.टी स्टांप शुल्क)</label>
+                    <input type="number" id="inputModtCharge" value="5605" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label for="inputModtFees">MODT Fees (एम.ओ.डी.टी पंजीयन शुल्क)</label>
+                    <input type="number" id="inputModtFees" value="2500" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn" onclick="downloadPDF()">📥 PDF डाउनलोड करें</button>
+            </div>
+        </div>
+
+        <!-- Live Preview Section -->
+        <div class="preview-section">
+            <div style="font-size: 10px; text-transform: uppercase; color: #9ca3af; margin-bottom: 10px; font-weight: bold; text-align: right;">Live Preview</div>
+            
+            <div id="invoice" class="invoice-box">
+                <div class="invoice-header">
+                    <h2 id="mainHeading">अनुमानित व्यय विवरण (Sale Deed & MODT)</h2>
+                </div>
+
+                <table class="meta-table">
+                    <tr>
+                        <td style="width: 35%;"><strong>क्लाइंट का नाम:</strong></td>
+                        <td id="pClientName">Punam Prajapat</td>
+                    </tr>
+                </table>
+
+                <table class="invoice-table">
+                    <!-- Valuation Section -->
+                    <thead>
+                        <tr class="table-section-head" id="headValuation">
+                            <th colspan="2">PROPERTY & LOAN VALUATION / संपत्ति एवं ऋण विवरण</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="rowValuationSaleDeed">
+                            <td>Sale Deed Value (बिक्री विलेख मूल्य)</td>
+                            <td class="amount" id="pSaleDeedValue">₹6,25,000.00</td>
+                        </tr>
+                        <tr id="rowValuationModt">
+                            <td>MODT Value (ऋण/लोन मूल्य)</td>
+                            <td class="amount" id="pModtValue">₹10,00,930.00</td>
+                        </tr>
+                    </tbody>
+
+                    <!-- Breakdown Section -->
+                    <thead>
+                        <tr class="table-section-head">
+                            <th colspan="2">EXPENSE BREAKDOWN / खर्चों का विवरण</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="rowChargeSaleDeed">
+                            <td>Sale Deed Charge (बिक्री विलेख शुल्क)</td>
+                            <td class="amount" id="pSaleDeedCharge">₹48,475.00</td>
+                        </tr>
+                        <tr id="rowFeesSaleDeed">
+                            <td>Sale Deed Fees (बिक्री विलेख पंजीयन शुल्क)</td>
+                            <td class="amount" id="pSaleDeedFees">₹3,000.00</td>
+                        </tr>
+                        <tr id="rowSocietyDuty">
+                            <td>Society Duty (सोसाइटी शुल्क)</td>
+                            <td class="amount" id="pSocietyDuty">₹2,300.00</td>
+                        </tr>
+                        <tr id="rowChargeModt">
+                            <td>MODT Charge (एम.ओ.डी.टी स्टांप शुल्क)</td>
+                            <td class="amount" id="pModtCharge">₹5,605.00</td>
+                        </tr>
+                        <tr id="rowFeesModt">
+                            <td>MODT Fees (एम.ओ.डी.टी पंजीयन शुल्क)</td>
+                            <td class="amount" id="pModtFees">₹2,500.00</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Estimated Cost (कुल अनुमानित खर्च)</td>
+                            <td class="amount" id="pTotalCost">₹64,880.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="notes-section">
+                    <div class="notes-title">IMPORTANT NOTES / महत्वपूर्ण निर्देश:</div>
+                    <ul>
+                        <li>उपरोक्त सभी शुल्क वर्तमान सरकारी नियमों और आपके द्वारा प्रदान किए गए आंकड़ों के अनुसार हैं।</li>
+                        <li>वास्तविक पंजीकरण के समय सरकारी नियमों या स्टांप ड्यूटी में बदलाव होने पर अंतिम राशि भिन्न हो सकती है।</li>
+                        <li>यह केवल एक अनुमानित कोटेशन है, अंतिम गणना दस्तावेज़ निष्पादन के समय की जाएगी।</li>
+                    </ul>
+                </div>
+
+                <div class="invoice-footer">
+                    Thank You! / धन्यवाद!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatCurrency(num) {
+        return '₹' + parseFloat(num).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function toggleSections() {
+        const isSaleDeed = document.getElementById('checkSaleDeed').checked;
+        const isModt = document.getElementById('checkModt').checked;
+        const isSociety = document.getElementById('checkSociety').checked;
+
+        const headingElement = document.getElementById('mainHeading');
+        if (isSaleDeed && isModt) {
+            headingElement.innerText = "अनुमानित व्यय विवरण (Sale Deed & MODT)";
+        } else if (isSaleDeed) {
+            headingElement.innerText = "अनुमानित व्यय विवरण (Sale Deed)";
+        } else if (isModt) {
+            headingElement.innerText = "अनुमानित व्यय विवरण (MODT)";
+        } else {
+            headingElement.innerText = "अनुमानित व्यय विवरण";
+        }
+
+        document.getElementById('formGroupSaleDeed').style.display = isSaleDeed ? 'block' : 'none';
+        document.getElementById('formGroupModt').style.display = isModt ? 'block' : 'none';
+        document.getElementById('formGroupSociety').style.display = isSociety ? 'block' : 'none';
+
+        document.getElementById('rowValuationSaleDeed').className = isSaleDeed ? '' : 'hidden-row';
+        document.getElementById('rowChargeSaleDeed').className = isSaleDeed ? '' : 'hidden-row';
+        document.getElementById('rowFeesSaleDeed').className = isSaleDeed ? '' : 'hidden-row';
+
+        document.getElementById('rowValuationModt').className = isModt ? '' : 'hidden-row';
+        document.getElementById('rowChargeModt').className = isModt ? '' : 'hidden-row';
+        document.getElementById('rowFeesModt').className = isModt ? '' : 'hidden-row';
+
+        document.getElementById('rowSocietyDuty').className = isSociety ? '' : 'hidden-row';
+
+        if (!isSaleDeed && !isModt) {
+            document.getElementById('headValuation').className = 'hidden-row';
+        } else {
+            document.getElementById('headValuation').className = 'table-section-head';
+        }
+
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const clientName = document.getElementById('inputClientName').value;
+        
+        const isSaleDeed = document.getElementById('checkSaleDeed').checked;
+        const isModt = document.getElementById('checkModt').checked;
+        const isSociety = document.getElementById('checkSociety').checked;
+
+        const saleDeedValue = parseFloat(document.getElementById('inputSaleDeedValue').value) || 0;
+        const modtValue = parseFloat(document.getElementById('inputModtValue').value) || 0;
+        
+        const sdCharge = isSaleDeed ? (parseFloat(document.getElementById('inputSaleDeedCharge').value) || 0) : 0;
+        const sdFees = isSaleDeed ? (parseFloat(document.getElementById('inputSaleDeedFees').value) || 0) : 0;
+        const societyDuty = isSociety ? (parseFloat(document.getElementById('inputSocietyDuty').value) || 0) : 0;
+        const modtCharge = isModt ? (parseFloat(document.getElementById('inputModtCharge').value) || 0) : 0;
+        const modtFees = isModt ? (parseFloat(document.getElementById('inputModtFees').value) || 0) : 0;
+
+        const totalCost = sdCharge + sdFees + societyDuty + modtCharge + modtFees;
+
+        document.getElementById('pClientName').innerText = clientName;
+        
+        document.getElementById('pSaleDeedValue').innerText = formatCurrency(saleDeedValue);
+        document.getElementById('pModtValue').innerText = formatCurrency(modtValue);
+        
+        document.getElementById('pSaleDeedCharge').innerText = formatCurrency(sdCharge);
+        document.getElementById('pSaleDeedFees').innerText = formatCurrency(sdFees);
+        document.getElementById('pSocietyDuty').innerText = formatCurrency(societyDuty);
+        document.getElementById('pModtCharge').innerText = formatCurrency(modtCharge);
+        document.getElementById('pModtFees').innerText = formatCurrency(modtFees);
+        
+        document.getElementById('pTotalCost').innerText = formatCurrency(totalCost);
+    }
+
+    // This ensures only the #invoice card element gets turned into a PDF
+    function downloadPDF() {
+        const element = document.getElementById('invoice');
+        const clientName = document.getElementById('inputClientName').value || 'Client';
+        
+        const opt = {
+            margin:       [10, 10, 10, 10],
+            filename:     `Quotation_${clientName.replace(/\s+/g, '_')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, logging: false, useCORS: true, letterRendering: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(element).save();
+    }
+
+    window.onload = function() {
+        toggleSections();
+    };
+</script>
+
+</body>
+</html>
